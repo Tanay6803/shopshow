@@ -5,6 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Item — ShopShow Admin</title>
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .img-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .img-preview-grid img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+    }
+    .img-preview-grid img:first-child {
+      border-color: #d4af37;
+    }
+    .img-count-note {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+  </style>
 </head>
 <body>
 <div class="admin-layout">
@@ -39,8 +62,8 @@
             <input type="text" id="title" name="title" class="form-input" placeholder="e.g. Handmade Leather Wallet" required>
           </div>
           <div class="form-group">
-            <label class="form-label" for="price">Price (₹) *</label>
-            <input type="number" id="price" name="price" class="form-input" placeholder="e.g. 999" min="0" step="0.01" required>
+            <label class="form-label" for="price">Price (KD) *</label>
+            <input type="number" id="price" name="price" class="form-input" placeholder="e.g. 9.99" min="0" step="0.01" required>
           </div>
         </div>
 
@@ -55,14 +78,15 @@
         </div>
 
         <div class="form-group" style="margin-bottom:1.5rem;">
-          <label class="form-label">Product Image *</label>
-          <div class="upload-zone">
-            <input type="file" id="imageInput" name="image" accept="image/*" required>
+          <label class="form-label">Product Images * <span style="font-weight:400;color:var(--muted);">(up to 8 photos)</span></label>
+          <div class="upload-zone" onclick="document.getElementById('imageInput').click()">
+            <input type="file" id="imageInput" name="images" accept="image/*" multiple required style="display:none;">
             <div class="upload-icon">📷</div>
-            <p><strong>Click to upload</strong> or drag and drop</p>
-            <p style="margin-top:0.3rem;font-size:0.78rem;">PNG, JPG, WEBP up to 10MB</p>
+            <p><strong>Click to upload photos</strong> or drag and drop</p>
+            <p style="margin-top:0.3rem;font-size:0.78rem;">PNG, JPG, WEBP up to 10MB each — select multiple at once</p>
           </div>
-          <img id="imagePreview" src="" alt="Preview" class="current-img" style="display:none;margin-top:0.75rem;">
+          <div id="previewGrid" class="img-preview-grid"></div>
+          <p class="img-count-note" id="imgCountNote"></p>
         </div>
 
         <div class="form-actions">
@@ -73,6 +97,25 @@
     </div>
   </main>
 </div>
-<script src="/js/main.js"></script>
+
+<script>
+  document.getElementById('imageInput').addEventListener('change', function() {
+    const grid = document.getElementById('previewGrid');
+    const note = document.getElementById('imgCountNote');
+    grid.innerHTML = '';
+    const files = Array.from(this.files).slice(0, 8);
+    files.forEach((file, idx) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.title = idx === 0 ? 'Cover photo (shown on cards)' : 'Photo ' + (idx + 1);
+        grid.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+    note.textContent = files.length + ' photo' + (files.length !== 1 ? 's' : '') + ' selected' + (files.length > 0 ? ' — first photo will be the cover image' : '');
+  });
+</script>
 </body>
 </html>

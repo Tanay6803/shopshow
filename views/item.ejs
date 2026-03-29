@@ -1,6 +1,7 @@
 <%
   const itemUrl = (typeof process !== 'undefined') ? '' : '';
   const fullUrl = '{{ITEM_URL}}';
+  const allImages = (item.images && item.images.length) ? item.images : (item.image ? [item.image] : []);
 %>
 <%- include('partials/header', {
   title: item.title,
@@ -23,9 +24,41 @@
 </a>
 
 <section class="item-detail animate-in">
-  <!-- Image -->
-  <div class="item-img-wrap">
-    <img src="<%= item.image %>" alt="<%= item.title %>">
+
+  <!-- Image Gallery -->
+  <div class="item-img-wrap" style="display:flex;flex-direction:column;gap:12px;">
+
+    <!-- Main large image -->
+    <div style="position:relative;overflow:hidden;border-radius:12px;background:#111;aspect-ratio:4/3;">
+      <img id="mainImage"
+        src="<%= allImages[0] %>"
+        alt="<%= item.title %>"
+        style="width:100%;height:100%;object-fit:contain;border-radius:12px;transition:opacity 0.2s ease;"
+      >
+      <% if (allImages.length > 1) { %>
+      <!-- Prev / Next arrows -->
+      <button onclick="changeImage(-1)" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;">‹</button>
+      <button onclick="changeImage(1)"  style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2;">›</button>
+      <!-- Image counter -->
+      <div id="imgCounter" style="position:absolute;bottom:10px;right:12px;background:rgba(0,0,0,0.6);color:#eee;font-size:0.72rem;padding:3px 9px;border-radius:20px;">1 / <%= allImages.length %></div>
+      <% } %>
+    </div>
+
+    <!-- Thumbnail strip (only if more than 1 image) -->
+    <% if (allImages.length > 1) { %>
+    <div id="thumbStrip" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;">
+      <% allImages.forEach((img, idx) => { %>
+        <img
+          src="<%= img %>"
+          alt="Photo <%= idx + 1 %>"
+          onclick="setImage(<%= idx %>)"
+          id="thumb-<%= idx %>"
+          style="width:72px;height:72px;object-fit:cover;border-radius:8px;cursor:pointer;flex-shrink:0;border:2px solid <%= idx === 0 ? '#d4af37' : 'transparent' %>;opacity:<%= idx === 0 ? '1' : '0.6' %>;transition:all 0.2s;"
+        >
+      <% }) %>
+    </div>
+    <% } %>
+
   </div>
 
   <!-- Info -->
@@ -51,10 +84,48 @@
 </section>
 
 <script>
+  var images = <%- JSON.stringify(allImages) %>;
+  var current = 0;
+
+  function setImage(idx) {
+    current = idx;
+    var mainImg = document.getElementById('mainImage');
+    mainImg.style.opacity = '0';
+    setTimeout(function() {
+      mainImg.src = images[idx];
+      mainImg.style.opacity = '1';
+    }, 150);
+    var counter = document.getElementById('imgCounter');
+    if (counter) counter.textContent = (idx + 1) + ' / ' + images.length;
+    // Update thumbnails
+    images.forEach(function(_, i) {
+      var thumb = document.getElementById('thumb-' + i);
+      if (thumb) {
+        thumb.style.border = i === idx ? '2px solid #d4af37' : '2px solid transparent';
+        thumb.style.opacity = i === idx ? '1' : '0.6';
+      }
+    });
+  }
+
+  function changeImage(dir) {
+    var next = (current + dir + images.length) % images.length;
+    setImage(next);
+  }
+
+  // Swipe support for mobile
+  var touchStartX = 0;
+  var mainImg = document.getElementById('mainImage');
+  if (mainImg) {
+    mainImg.addEventListener('touchstart', function(e) { touchStartX = e.touches[0].clientX; });
+    mainImg.addEventListener('touchend', function(e) {
+      var diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 40) changeImage(diff > 0 ? 1 : -1);
+    });
+  }
+
   function orderOnWhatsApp(itemTitle) {
     var message = encodeURIComponent('Hi! I would like to place an order for: ' + itemTitle);
-    var waLink = 'https://wa.me/96541201907?text=' + message;
-    window.open(waLink, '_blank');
+    window.open('https://wa.me/96541201907?text=' + message, '_blank');
   }
 </script>
 

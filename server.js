@@ -7,7 +7,7 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ── Data file (replaces DB) ──────────────────────────────────────────────────
+// ── Data file ────────────────────────────────────────────────────────────────
 const DATA_FILE = path.join(__dirname, 'data', 'items.json');
 if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, '[]');
 
@@ -19,13 +19,12 @@ function writeItems(items) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(items, null, 2));
 }
 
-// ── Admin credentials (change these!) ────────────────────────────────────────
-const ADMIN_ID  = process.env.ADMIN_ID  || 'admin';
+// ── Admin credentials ────────────────────────────────────────────────────────
+const ADMIN_ID   = process.env.ADMIN_ID   || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'shopshow2024';
 
-// ── Multer (image uploads) ────────────────────────────────────────────────────
+// ── Multer (multiple image uploads) ──────────────────────────────────────────
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, path.join(__dirname, 'public', 'uploads')),
   destination: (req, file, cb) => {
     const dir = path.join(__dirname, 'public', 'uploads');
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -65,13 +64,11 @@ function requireAdmin(req, res, next) {
 
 // ── PUBLIC ROUTES ─────────────────────────────────────────────────────────────
 
-// Home — all items
 app.get('/', (req, res) => {
   const items = readItems().reverse();
   res.render('index', { items });
 });
 
-// Single item page (for share links)
 app.get('/item/:id', (req, res) => {
   const items = readItems();
   const item = items.find(i => i.id === req.params.id);
@@ -79,7 +76,6 @@ app.get('/item/:id', (req, res) => {
   res.render('item', { item });
 });
 
-// API: all items (JSON)
 app.get('/api/items', (req, res) => {
   res.json(readItems().reverse());
 });
@@ -114,14 +110,16 @@ app.get('/admin/add', requireAdmin, (req, res) => {
   res.render('admin-add', { error: null, success: null });
 });
 
-app.post('/admin/add', requireAdmin, upload.single('image'), (req, res) => {
+// ADD item — accept up to 8 images
+app.post('/admin/add', requireAdmin, upload.array('images', 8), (req, res) => {
   const { title, description, price, category } = req.body;
-  if (!title || !price || !req.file) {
+  if (!title || !price || !req.files || req.files.length === 0) {
     return res.render('admin-add', {
-      error: 'Title, price and image are required.',
+      error: 'Title, price and at least one image are required.',
       success: null
     });
   }
+  const images = req.files.map(f => '/uploads/' + f.filename);
   const items = readItems();
   const newItem = {
     id: Date.now().toString(),
@@ -129,7 +127,8 @@ app.post('/admin/add', requireAdmin, upload.single('image'), (req, res) => {
     description: description ? description.trim() : '',
     price: parseFloat(price).toFixed(2),
     category: category ? category.trim() : 'General',
-    image: '/uploads/' + req.file.filename,
+    image: images[0],      // keep first as primary for card thumbnails
+    images: images,        // all images for detail page
     createdAt: new Date().toISOString()
   };
   items.push(newItem);
@@ -144,16 +143,32 @@ app.get('/admin/edit/:id', requireAdmin, (req, res) => {
   res.render('admin-edit', { item, error: null, success: null });
 });
 
-app.post('/admin/edit/:id', requireAdmin, upload.single('image'), (req, res) => {
+// EDIT item — accept up to 8 images
+app.post('/admin/edit/:id', requireAdmin, upload.array('images', 8), (req, res) => {
   const items = readItems();
   const idx = items.findIndex(i => i.id === req.params.id);
   if (idx === -1) return res.redirect('/admin');
   const { title, description, price, category } = req.body;
-  items[idx].title = title.trim();
+  items[idx].title       = title.trim();
   items[idx].description = description ? description.trim() : '';
-  items[idx].price = parseFloat(price).toFixed(2);
-  items[idx].category = category ? category.trim() : 'General';
-  if (req.file) items[idx].image = '/uploads/' + req.file.filename;
+  items[idx].price       = parseFloat(price).toFixed(2);
+  items[idx].category    = category ? category.trim() : 'General';
+  if (req.files && req.files.length > 0) {
+    // Delete old images from disk
+    const oldImages = items[idx].images || (items[idx].image ? [items[idx].image] : []);
+    oldImages.forEach(img => {
+      const imgPath = path.join(__dirname, 'public', img);
+      if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+    });
+    const newImages = req.files.map(f => '/uploads/' + f.filename);
+    items[idx].image  = newImages[0];
+    items[idx].images = newImages;
+  } else {
+    // Ensure images array exists for old single-image items
+    if (!items[idx].images) {
+      items[idx].images = items[idx].image ? [items[idx].image] : [];
+    }
+  }
   writeItems(items);
   res.render('admin-edit', { item: items[idx], error: null, success: 'Updated!' });
 });
@@ -161,9 +176,12 @@ app.post('/admin/edit/:id', requireAdmin, upload.single('image'), (req, res) => 
 app.post('/admin/delete/:id', requireAdmin, (req, res) => {
   let items = readItems();
   const item = items.find(i => i.id === req.params.id);
-  if (item && item.image) {
-    const imgPath = path.join(__dirname, 'public', item.image);
-    if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+  if (item) {
+    const allImages = item.images || (item.image ? [item.image] : []);
+    allImages.forEach(img => {
+      const imgPath = path.join(__dirname, 'public', img);
+      if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+    });
   }
   items = items.filter(i => i.id !== req.params.id);
   writeItems(items);
