@@ -38,7 +38,7 @@
       </div>
       <div class="stat-card">
         <div class="stat-val">
-          ₹<% if(items.length){ %><%= Math.min(...items.map(i=>parseFloat(i.price))).toLocaleString('en-IN') %> – <%= Math.max(...items.map(i=>parseFloat(i.price))).toLocaleString('en-IN') %><% } else { %>—<% } %>
+          KD <% if(items.length){ %><%= Math.min(...items.map(i=>parseFloat(i.price))).toLocaleString('en-KW') %> – <%= Math.max(...items.map(i=>parseFloat(i.price))).toLocaleString('en-KW') %><% } else { %>—<% } %>
         </div>
         <div class="stat-lbl">Price Range</div>
       </div>
@@ -89,9 +89,9 @@
               <% } %>
             </td>
             <td><span class="cat-badge"><%= item.category || 'General' %></span></td>
-            <td><span class="price-tag">₹<%= parseFloat(item.price).toLocaleString('en-IN') %></span></td>
+            <td><span class="price-tag">KD <%= parseFloat(item.price).toLocaleString('en-KW') %></span></td>
             <td style="font-size:0.78rem;color:var(--muted);white-space:nowrap;">
-              <%= new Date(item.createdAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %>
+              <%= new Date(item.createdAt).toLocaleDateString('en-KW', {day:'numeric',month:'short',year:'numeric'}) %>
             </td>
             <td>
               <div class="action-btns">

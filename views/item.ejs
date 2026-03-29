@@ -32,7 +32,7 @@
   <div class="item-info">
     <span class="category-tag">✦ <%= item.category || 'General' %></span>
     <h1><%= item.title %></h1>
-    <div class="item-price">₹<%= parseFloat(item.price).toLocaleString('en-IN') %></div>
+    <div class="item-price">KD <%= parseFloat(item.price).toLocaleString('en-KW') %></div>
     <p class="item-desc"><%= item.description || 'No description provided.' %></p>
 
     <!-- Order via WhatsApp -->
@@ -46,7 +46,7 @@
       </div>
     </div>
 
-    <p class="item-date">Listed on <%= new Date(item.createdAt).toLocaleDateString('en-IN', { year:'numeric', month:'long', day:'numeric' }) %></p>
+    <p class="item-date">Listed on <%= new Date(item.createdAt).toLocaleDateString('en-KW', { year:'numeric', month:'long', day:'numeric' }) %></p>
   </div>
 </section>
 
