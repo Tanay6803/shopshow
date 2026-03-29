@@ -15,5 +15,65 @@
   <meta name="twitter:card"       content="summary_large_image">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍</text></svg>">
+
+  <!-- Google Translate -->
+  <style>
+    #google-translate-bar {
+      background: #1a1a1a;
+      padding: 6px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      font-size: 0.78rem;
+      color: #aaa;
+      border-bottom: 1px solid #2a2a2a;
+      position: relative;
+      z-index: 9999;
+    }
+    #google-translate-bar span {
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+      color: #666;
+      text-transform: uppercase;
+    }
+    /* Hide Google's default top banner */
+    .goog-te-banner-frame, .skiptranslate { display: none !important; }
+    body { top: 0 !important; }
+    /* Style the dropdown */
+    #google_translate_element select {
+      background: #2a2a2a;
+      color: #eee;
+      border: 1px solid #3a3a3a;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      outline: none;
+    }
+    #google_translate_element select:hover {
+      border-color: #d4af37;
+    }
+    .goog-te-gadget { color: transparent !important; font-size: 0 !important; }
+    .goog-te-gadget a { display: none !important; }
+  </style>
 </head>
 <body>
+
+<!-- Language Bar -->
+<div id="google-translate-bar">
+  <span>🌐 Language</span>
+  <div id="google_translate_element"></div>
+</div>
+
+<script>
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+      pageLanguage: 'en',
+      includedLanguages: 'en,hi,ta,te,ml,ne,ar,tl,bn,ur',
+      layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      autoDisplay: false
+    }, 'google_translate_element');
+  }
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
