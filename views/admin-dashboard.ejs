@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — ShopShow Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍</text></svg>">
+</head>
+<body>
+<div class="admin-layout">
+
+  <!-- Admin Nav -->
+  <nav class="admin-nav">
+    <div class="brand">Shop<span>Show</span> <span style="font-family:var(--ff-mono);font-size:0.65rem;opacity:0.5;font-weight:400;margin-left:0.4rem;">ADMIN</span></div>
+    <div class="admin-nav-links">
+      <a href="/admin" class="active">Dashboard</a>
+      <a href="/admin/add">+ Add Item</a>
+      <a href="/" target="_blank">View Site ↗</a>
+      <a href="/admin/logout">Sign Out</a>
+    </div>
+  </nav>
+
+  <main class="admin-main animate-in">
+    <div class="page-title">Dashboard</div>
+    <div class="page-subtitle">Manage all your product listings</div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val"><%= items.length %></div>
+        <div class="stat-lbl">Total Listings</div>
+      </div>
+      <% const cats = [...new Set(items.map(i=>i.category).filter(Boolean))]; %>
+      <div class="stat-card">
+        <div class="stat-val"><%= cats.length || 0 %></div>
+        <div class="stat-lbl">Categories</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val">
+          ₹<% if(items.length){ %><%= Math.min(...items.map(i=>parseFloat(i.price))).toLocaleString('en-IN') %> – <%= Math.max(...items.map(i=>parseFloat(i.price))).toLocaleString('en-IN') %><% } else { %>—<% } %>
+        </div>
+        <div class="stat-lbl">Price Range</div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="admin-table-wrap">
+      <div class="admin-table-header">
+        <h3>All Listings</h3>
+        <a href="/admin/add" class="btn-add">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Add New Item
+        </a>
+      </div>
+
+      <% if (items.length === 0) { %>
+        <div class="empty-state" style="padding:4rem 2rem;">
+          <div class="empty-icon">📭</div>
+          <h3>No items yet</h3>
+          <p>Click "Add New Item" to create your first listing.</p>
+        </div>
+      <% } else { %>
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Date Added</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% items.forEach(item => { %>
+          <tr>
+            <td>
+              <% if (item.image) { %>
+                <img src="<%= item.image %>" alt="<%= item.title %>" class="admin-thumb">
+              <% } else { %>
+                <div class="admin-thumb-placeholder">📷</div>
+              <% } %>
+            </td>
+            <td>
+              <strong><%= item.title %></strong>
+              <% if (item.description) { %>
+                <br><span style="font-size:0.78rem;color:var(--muted);"><%= item.description.substring(0, 60) %><%= item.description.length > 60 ? '…' : '' %></span>
+              <% } %>
+            </td>
+            <td><span class="cat-badge"><%= item.category || 'General' %></span></td>
+            <td><span class="price-tag">₹<%= parseFloat(item.price).toLocaleString('en-IN') %></span></td>
+            <td style="font-size:0.78rem;color:var(--muted);white-space:nowrap;">
+              <%= new Date(item.createdAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %>
+            </td>
+            <td>
+              <div class="action-btns">
+                <a href="/admin/edit/<%= item.id %>" class="btn-edit">Edit</a>
+                <form action="/admin/delete/<%= item.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this item?')">
+                  <button type="submit" class="btn-delete">Delete</button>
+                </form>
+                <a href="/item/<%= item.id %>" target="_blank" class="btn-edit" title="View on site">↗</a>
+              </div>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <% } %>
+    </div>
+  </main>
+</div>
+<script src="/js/main.js"></script>
+</body>
+</html>

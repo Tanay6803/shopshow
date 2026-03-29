@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title + ' — ShopShow' : 'ShopShow' %></title>
+  <meta name="description" content="<%= typeof metaDesc !== 'undefined' ? metaDesc : 'Discover and share amazing products on ShopShow.' %>">
+  <!-- OG tags for social sharing -->
+  <meta property="og:title"       content="<%= typeof ogTitle !== 'undefined' ? ogTitle : 'ShopShow' %>">
+  <meta property="og:description" content="<%= typeof ogDesc !== 'undefined' ? ogDesc : 'Discover amazing products.' %>">
+  <% if (typeof ogImage !== 'undefined') { %>
+  <meta property="og:image"       content="<%= ogImage %>">
+  <% } %>
+  <meta property="og:type"        content="website">
+  <meta name="twitter:card"       content="summary_large_image">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍</text></svg>">
+</head>
+<body>

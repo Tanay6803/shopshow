@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Item — ShopShow Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div class="admin-layout">
+
+  <nav class="admin-nav">
+    <div class="brand">Shop<span>Show</span> <span style="font-family:var(--ff-mono);font-size:0.65rem;opacity:0.5;font-weight:400;margin-left:0.4rem;">ADMIN</span></div>
+    <div class="admin-nav-links">
+      <a href="/admin">Dashboard</a>
+      <a href="/admin/add">+ Add Item</a>
+      <a href="/" target="_blank">View Site ↗</a>
+      <a href="/admin/logout">Sign Out</a>
+    </div>
+  </nav>
+
+  <main class="admin-main">
+    <div class="page-title">Edit Item</div>
+    <div class="page-subtitle">Update the details for "<%= item.title %>"</div>
+
+    <% if (error) { %>
+      <div class="alert alert-error" style="max-width:680px;margin-bottom:1.5rem;"><%= error %></div>
+    <% } %>
+    <% if (success) { %>
+      <div class="alert alert-success" style="max-width:680px;margin-bottom:1.5rem;"><%= success %> <a href="/admin">← Back to dashboard</a></div>
+    <% } %>
+
+    <div class="form-card animate-in">
+      <form action="/admin/edit/<%= item.id %>" method="POST" enctype="multipart/form-data">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="title">Product Title *</label>
+            <input type="text" id="title" name="title" class="form-input" value="<%= item.title %>" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="price">Price (₹) *</label>
+            <input type="number" id="price" name="price" class="form-input" value="<%= item.price %>" min="0" step="0.01" required>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.2rem;">
+          <label class="form-label" for="category">Category</label>
+          <input type="text" id="category" name="category" class="form-input" value="<%= item.category || '' %>" placeholder="e.g. Accessories, Electronics…">
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.2rem;">
+          <label class="form-label" for="description">Description</label>
+          <textarea id="description" name="description" class="form-textarea"><%= item.description || '' %></textarea>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label class="form-label">Product Image</label>
+          <% if (item.image) { %>
+            <div style="margin-bottom:0.75rem;">
+              <p style="font-size:0.78rem;color:var(--muted);margin-bottom:0.5rem;">Current image:</p>
+              <img src="<%= item.image %>" alt="Current" class="current-img" id="imagePreview">
+            </div>
+          <% } %>
+          <div class="upload-zone">
+            <input type="file" id="imageInput" name="image" accept="image/*">
+            <div class="upload-icon">🔄</div>
+            <p><strong>Click to replace image</strong> or leave blank to keep current</p>
+            <p style="margin-top:0.3rem;font-size:0.78rem;">PNG, JPG, WEBP up to 10MB</p>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <a href="/admin" class="btn-secondary">Cancel</a>
+          <button type="submit" class="btn-primary-form">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+<script src="/js/main.js"></script>
+</body>
+</html>

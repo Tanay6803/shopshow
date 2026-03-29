@@ -1,0 +1,72 @@
+<%
+  const itemUrl = (typeof process !== 'undefined') ? '' : '';
+  const fullUrl = '{{ITEM_URL}}';
+%>
+<%- include('partials/header', {
+  title: item.title,
+  metaDesc: item.description || 'View and share this product on ShopShow.',
+  ogTitle: item.title,
+  ogDesc: item.description,
+  ogImage: item.image
+}) %>
+
+<nav class="navbar">
+  <a href="/" class="nav-brand">Shop<span>Show</span></a>
+  <div class="nav-links">
+    <a href="/">← All Products</a>
+  </div>
+</nav>
+
+<a href="/" class="back-link">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+  Back to all products
+</a>
+
+<section class="item-detail animate-in">
+  <!-- Image -->
+  <div class="item-img-wrap">
+    <img src="<%= item.image %>" alt="<%= item.title %>">
+  </div>
+
+  <!-- Info -->
+  <div class="item-info">
+    <span class="category-tag">✦ <%= item.category || 'General' %></span>
+    <h1><%= item.title %></h1>
+    <div class="item-price">₹<%= parseFloat(item.price).toLocaleString('en-IN') %></div>
+    <p class="item-desc"><%= item.description || 'No description provided.' %></p>
+
+    <!-- Share section -->
+    <div class="share-actions">
+      <p>Share this product</p>
+      <div class="share-actions-row">
+        <button class="share-pill sp-wa"
+          onclick="shareOnPage('whatsapp', window.location.href, '<%= item.title.replace(/'/g, "\\'") %>')">
+          📱 WhatsApp
+        </button>
+        <button class="share-pill sp-fb"
+          onclick="shareOnPage('facebook', window.location.href, '<%= item.title.replace(/'/g, "\\'") %>')">
+          Facebook
+        </button>
+        <button class="share-pill sp-tw"
+          onclick="shareOnPage('twitter', window.location.href, '<%= item.title.replace(/'/g, "\\'") %>')">
+          𝕏 Twitter
+        </button>
+        <button class="share-pill sp-tg"
+          onclick="shareOnPage('telegram', window.location.href, '<%= item.title.replace(/'/g, "\\'") %>')">
+          Telegram
+        </button>
+        <button class="share-pill sp-ig"
+          onclick="shareOnPage('instagram', window.location.href, '<%= item.title.replace(/'/g, "\\'") %>')">
+          Instagram
+        </button>
+        <button class="share-pill sp-cp" onclick="copyPageLink(window.location.href)">
+          🔗 Copy Link
+        </button>
+      </div>
+    </div>
+
+    <p class="item-date">Listed on <%= new Date(item.createdAt).toLocaleDateString('en-IN', { year:'numeric', month:'long', day:'numeric' }) %></p>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
