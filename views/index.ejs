@@ -81,8 +81,11 @@
           <p class="card-desc"><%= item.description || 'No description provided.' %></p>
         </div>
         <div class="card-footer">
-          <div class="card-price">
-            <span>KD </span><%= parseFloat(item.price).toLocaleString('en-KW') %>
+          <div>
+            <div class="card-price">
+              <span>KD </span><%= parseFloat(item.price).toLocaleString('en-KW') %>
+            </div>
+            <div style="font-size:0.72rem;color:#25D366;margin-top:3px;font-weight:600;">🚚 Free shipping &nbsp;·&nbsp; 📦 Qty: <%= item.quantity || 1 %></div>
           </div>
           <div style="display:flex;gap:0.5rem;">
             <a href="/item/<%= item.id %>" class="view-btn">

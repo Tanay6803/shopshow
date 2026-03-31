@@ -24,6 +24,7 @@ const itemSchema = new mongoose.Schema({
   category: { type: String, default: 'General' },
   image: { type: String },
   images: [{ type: String }],
+  quantity: { type: Number, default: 1 },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -138,7 +139,7 @@ app.get('/admin/add', requireAdmin, (req, res) => {
 });
 
 app.post('/admin/add', requireAdmin, upload.array('images', 8), async (req, res) => {
-  const { title, description, price, category } = req.body;
+  const { title, description, price, category, quantity } = req.body;
   if (!title || !price || !req.files || req.files.length === 0) {
     return res.render('admin-add', {
       error: 'Title, price and at least one image are required.',
@@ -155,6 +156,7 @@ app.post('/admin/add', requireAdmin, upload.array('images', 8), async (req, res)
       category: category ? category.trim() : 'General',
       image: images[0],
       images: images,
+      quantity: parseInt(quantity) || 1,
       createdAt: new Date()
     });
     await newItem.save();
@@ -179,11 +181,12 @@ app.post('/admin/edit/:id', requireAdmin, upload.array('images', 8), async (req,
   try {
     const item = await Item.findOne({ id: req.params.id });
     if (!item) return res.redirect('/admin');
-    const { title, description, price, category } = req.body;
+    const { title, description, price, category, quantity } = req.body;
     item.title       = title.trim();
     item.description = description ? description.trim() : '';
     item.price       = parseFloat(price).toFixed(2);
     item.category    = category ? category.trim() : 'General';
+    item.quantity    = parseInt(quantity) || 1;
     if (req.files && req.files.length > 0) {
       const newImages = req.files.map(f => '/uploads/' + f.filename);
       item.image  = newImages[0];
