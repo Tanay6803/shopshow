@@ -4,6 +4,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,6 +16,13 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://shopshow:shopshop@
 mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ MongoDB connected successfully'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
+
+// ── Cloudinary Config ─────────────────────────────────────────────────────────
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 // ── Item Schema ───────────────────────────────────────────────────────────────
 const itemSchema = new mongoose.Schema({
@@ -34,21 +43,18 @@ const Item = mongoose.model('Item', itemSchema);
 const ADMIN_ID   = process.env.ADMIN_ID   || 'admin';
 const ADMIN_PASS = process.env.ADMIN_PASS || 'shopshow2024';
 
-// ── Multer (image uploads) ────────────────────────────────────────────────────
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, 'public', 'uploads');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const unique = Date.now() + '-' + Math.round(Math.random() * 1e6);
-    cb(null, unique + path.extname(file.originalname));
+// ── Multer + Cloudinary Storage ───────────────────────────────────────────────
+const cloudStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'shopshow',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    transformation: [{ width: 1200, height: 1200, crop: 'limit', quality: 'auto' }]
   }
 });
 
 const upload = multer({
-  storage,
+  storage: cloudStorage,
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = /jpeg|jpg|png|gif|webp/;
@@ -147,7 +153,7 @@ app.post('/admin/add', requireAdmin, upload.array('images', 8), async (req, res)
     });
   }
   try {
-    const images = req.files.map(f => '/uploads/' + f.filename);
+    const images = req.files.map(f => f.path || f.secure_url);
     const newItem = new Item({
       id: Date.now().toString(),
       title: title.trim(),
@@ -188,7 +194,7 @@ app.post('/admin/edit/:id', requireAdmin, upload.array('images', 8), async (req,
     item.category    = category ? category.trim() : 'General';
     item.quantity    = parseInt(quantity) || 1;
     if (req.files && req.files.length > 0) {
-      const newImages = req.files.map(f => '/uploads/' + f.filename);
+      const newImages = req.files.map(f => f.path || f.secure_url);
       item.image  = newImages[0];
       item.images = newImages;
     } else {
@@ -217,6 +223,5 @@ app.use((req, res) => res.status(404).render('404'));
 
 app.listen(PORT, () => {
   console.log(`\n🚀 ShopShow running at http://localhost:${PORT}`);
-  console.log(`🔐 Admin: http://localhost:${PORT}/admin/login`);
-  console.log(`   ID: ${ADMIN_ID}  |  Pass: ${ADMIN_PASS}\n`);
+  console.log(`🔐 Admin: http://localhost:${PORT}/admin/login\n`);
 });
