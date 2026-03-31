@@ -67,13 +67,13 @@
     <h1><%= item.title %></h1>
     <div class="item-price">KD <%= parseFloat(item.price).toLocaleString('en-KW') %></div>
 
-    <!-- Quantity & Shipping Info -->
+    <!-- Quantity & Delivery Info -->
     <div style="display:flex;flex-wrap:wrap;gap:10px;margin:0.8rem 0 1rem;">
       <span style="background:#1a1a2e;border:1px solid #d4af37;color:#d4af37;padding:6px 14px;border-radius:20px;font-size:0.82rem;font-weight:600;">
-        📦 <%= item.quantity || 1 %> item<%= (item.quantity || 1) > 1 ? 's' : '' %> available
+        🛍️ <%= item.quantity || 1 %> <%= item.title %> for KD <%= parseFloat(item.price).toLocaleString('en-KW') %>
       </span>
       <span style="background:#0d2b1f;border:1px solid #25D366;color:#25D366;padding:6px 14px;border-radius:20px;font-size:0.82rem;font-weight:600;">
-        🚚 Free shipping to your address
+        🚚 Free delivery to your address
       </span>
     </div>
 
